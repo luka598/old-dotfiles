@@ -1,0 +1,484 @@
+* Credits
+ - Systemcrafters and their emacs from scratch series, github repo: https://github.com/daviwil/emacs-from-scratch.
+ - Snackon and their emacs config files, github repo: https://github.com/snackon/Witchmacs
+
+* "Native" config
+** Basic UI config
+  #+BEGIN_SRC emacs-lisp
+	(setq inhibit-startup-message t)
+
+	(scroll-bar-mode -1)        ; Disable visible scrollbar
+	(tool-bar-mode -1)          ; Disable the toolbar
+	(tooltip-mode -1)           ; Disable tooltips
+	(set-fringe-mode 10)        ; Give some breathing room
+
+	(menu-bar-mode -1)            ; Disable the menu bar
+
+	;; Set up the visible bell
+	(setq visible-bell t)
+
+	(set-face-attribute 'default nil :font "Ubuntu Mono" :height 130)
+
+	(load-theme 'wombat)
+
+	(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+	(add-hook 'text-mode-hook 'display-line-numbers-mode)
+
+	(delete-selection-mode 1)
+
+  #+END_SRC
+** Indentation
+   #+BEGIN_SRC elisp
+     (setq-default tab-width 4)
+     (setq-default standard-indent 4)
+     (setq c-basic-offset tab-width)
+     (setq-default electric-indent-inhibit t)
+     (setq-default indent-tabs-mode t)
+     (setq backward-delete-char-untabify-method 'nil)
+   #+END_SRC
+** Parenthesis
+   #+BEGIN_SRC elisp
+     (show-paren-mode 1)
+     (setq electric-pair-pairs '(
+				 (?\{ . ?\})
+				 (?\( . ?\))
+				 (?\[ . ?\])
+				 (?\" . ?\")
+				 ))
+     (electric-pair-mode t)
+   #+END_SRC
+** Auto-backup
+   #+BEGIN_SRC elisp
+	 (setq make-backup-files nil)
+	 (setq auto-save-default nil)
+   #+END_SRC
+   From old config:
+   #+BEGIN_SRC elisp
+	 ;; Disable backup
+	 (setq backup-inhibited t)
+	 ;; Disable auto save
+	 (setq auto-save-default nil)
+	 ;; Prevents creation of lockfiles
+	 (setq create-lockfiles nil)
+   #+END_SRC
+** Config packages
+*** Configure package manager
+   #+BEGIN_SRC emacs-lisp
+     ;; Initialize package sources
+     (require 'package)
+
+     (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			      ("org" . "https://orgmode.org/elpa/")
+			      ("elpa" . "https://elpa.gnu.org/packages/")))
+
+     (package-initialize)
+     (unless package-archive-contents
+      (package-refresh-contents))
+
+     ;; Initialize use-package on non-Linux platforms
+     (unless (package-installed-p 'use-package)
+	(package-install 'use-package))
+
+     (require 'use-package)
+     (setq use-package-always-ensure t)
+   #+END_SRC
+
+** Basic keybinds
+  #+BEGIN_SRC emacs-lisp
+    ; Make ESC quit prompts
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  #+END_SRC
+
+* Other packages config
+** async
+   #+BEGIN_SRC elisp
+     (use-package async
+	    :ensure t
+	    :init
+	    (dired-async-mode 1))
+   #+END_SRC
+** Gruvbox
+   Gruvbox is best theme.
+   #+BEGIN_SRC elisp
+	(use-package gruvbox-theme
+	  :init (load-theme 'gruvbox-dark-hard t)
+	  )
+   #+END_SRC
+** Ivy
+   #+BEGIN_SRC elisp
+     (use-package ivy
+	   :diminish
+	   :bind (("C-s" . swiper)
+		  :map ivy-minibuffer-map
+		  ("TAB" . ivy-alt-done)	
+		  ("C-l" . ivy-alt-done)
+		  ("C-j" . ivy-next-line)
+		  ("C-k" . ivy-previous-line)
+		  :map ivy-switch-buffer-map
+		  ("C-k" . ivy-previous-line)
+		  ("C-l" . ivy-done)
+		  ("C-d" . ivy-switch-buffer-kill)
+		  :map ivy-reverse-i-search-map
+		  ("C-k" . ivy-previous-line)
+		  ("C-d" . ivy-reverse-i-search-kill))
+	   :init
+	   (ivy-mode 1))
+   #+END_SRC
+** counsel
+   #+BEGIN_SRC elisp
+     (use-package counsel
+       :bind (("M-x" . counsel-M-x)
+	      ("C-x b" . counsel-ibuffer)
+	      ("C-x C-f" . counsel-find-file)
+	      :map minibuffer-local-map
+	      ("C-r" . 'counsel-minibuffer-history)))
+   #+END_SRC
+** ivy-rich
+   Ivy rich
+   #+BEGIN_SRC elisp
+     (use-package ivy-rich
+       :init
+       (ivy-rich-mode 1))
+   #+END_SRC
+** helpful
+   #+BEGIN_SRC elisp
+     (use-package helpful
+       :custom
+       (counsel-describe-function-function #'helpful-callable)
+       (counsel-describe-variable-function #'helpful-variable)
+       :bind
+       ([remap describe-function] . counsel-describe-function)
+       ([remap describe-command] . helpful-command)
+       ([remap describe-variable] . counsel-describe-variable)
+       ([remap describe-key] . helpful-key))
+   #+END_SRC
+** all-the-icons
+   Note: you need to run M-x all-the-icons-install-fonts to install all fonts
+   #+BEGIN_SRC elisp
+     (use-package all-the-icons)
+   #+END_SRC
+** doom-modeline
+   I personally like default emacs modeline so this is disabled but maybe in future i will change my mind
+
+   #+BEGIN_SRC elisp
+	 ;; (use-package doom-modeline
+	 ;; :ensure t
+	 ;; :init (doom-modeline-mode 1)
+	 ;; :custom
+	 ;; ((doom-modeline-height 15)))(setq inhibit-startup-message t)
+   #+END_SRC
+
+   #+RESULTS:
+
+** rainbow-delimiters
+   #+BEGIN_SRC elisp
+     (use-package rainbow-delimiters
+     :hook (prog-mode . rainbow-delimiters-mode))
+   #+END_SRC
+
+** which-key
+   #+BEGIN_SRC elisp
+     (use-package which-key
+       :init (which-key-mode)
+       :diminish which-key-mode
+       :config
+       (setq which-key-idle-delay 0.5))
+   #+END_SRC
+
+** evil
+   #+BEGIN_SRC elisp
+     (use-package evil
+       :init
+       (setq evil-want-integration t)
+       (setq evil-want-keybinding nil)
+       (setq evil-want-C-u-scroll t)
+       (setq evil-want-C-i-jump nil)
+       :config
+       (evil-mode 1)
+       (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+       (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+       ;; Use visual line motions even outside of visual-line-mode buffers
+       (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+       (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+       (evil-set-initial-state 'messages-buffer-mode 'normal)
+       (evil-set-initial-state 'dashboard-mode 'normal))
+   #+END_SRC
+
+   Remap d to delete and D to cut
+   #+BEGIN_SRC elisp
+	 ;; delete without register
+	 (evil-define-operator evil-delete-without-register (beg end type yank-handler)
+	   (interactive "<R><y>")
+	   (evil-delete beg end type ?_ yank-handler))
+	 (define-key evil-normal-state-map (kbd "d") 'evil-delete-without-register)
+	 (define-key evil-visual-state-map (kbd "d") 'evil-delete-without-register)
+	 (define-key evil-normal-state-map (kbd "D") 'evil-delete)
+	 (define-key evil-visual-state-map (kbd "D") 'evil-delete)
+   #+END_SRC
+** evil-collection
+  #+BEGIN_SRC elisp
+    (use-package evil-collection
+      :after evil
+      :config
+      (evil-collection-init))
+  #+END_SRC
+** general
+   #+BEGIN_SRC elisp
+	 (use-package general
+	   :config
+	   (general-create-definer mye/leader-keys
+	 :keymaps '(normal insert visual emacs)
+	 :prefix "SPC"
+	 :global-prefix "C-SPC")
+
+	 (mye/leader-keys
+	 "t"  '(:ignore t :which-key "toggles")
+	 "tt" '(counsel-load-theme :which-key "choose theme")
+	 "tw" '(toggle-truncate-lines :which-key "Toggle line wrap")))
+   #+END_SRC
+
+   #+RESULTS:
+   : t
+
+** hydra
+   #+BEGIN_SRC elisp
+     (use-package hydra)
+
+     (defhydra hydra-text-scale (:timeout 5)
+       "scale text"
+       ("j" text-scale-increase "in")
+       ("k" text-scale-decrease "out")
+       ("f" nil "finished" :exit t))
+
+     (mye/leader-keys
+       "ts" '(hydra-text-scale/body :which-key "scale text"))
+   #+END_SRC
+
+   #+RESULTS:
+ 
+** treemacs
+   #+BEGIN_SRC elisp
+	 (use-package treemacs
+	   :ensure t
+	   :defer t
+	   :init
+	   (with-eval-after-load 'winum
+		 (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  
+	   :config
+	   (progn
+		 (setq treemacs-collapse-dirs                 (if (executable-find "python3") 3 0)
+			   treemacs-deferred-git-apply-delay      0.5
+			   treemacs-display-in-side-window        t
+			   treemacs-eldoc-display                 t
+			   treemacs-file-event-delay              5000
+			   treemacs-file-follow-delay             0.2
+			   treemacs-follow-after-init             t
+			   treemacs-git-command-pipe              ""
+			   treemacs-goto-tag-strategy             'refetch-index
+			   treemacs-indentation                   2
+			   treemacs-indentation-string            " "
+			   treemacs-is-never-other-window         nil
+			   treemacs-max-git-entries               5000
+			   treemacs-missing-project-action        'ask
+			   treemacs-no-png-images                 nil
+			   treemacs-no-delete-other-windows       t
+			   treemacs-project-follow-cleanup        nil
+			   treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+			   treemacs-recenter-distance             0.1
+			   treemacs-recenter-after-file-follow    nil
+			   treemacs-recenter-after-tag-follow     nil
+			   treemacs-recenter-after-project-jump   'always
+			   treemacs-recenter-after-project-expand 'on-distance
+			   treemacs-show-cursor                   nil
+			   treemacs-show-hidden-files             t
+			   treemacs-silent-filewatch              nil
+			   treemacs-silent-refresh                nil
+			   treemacs-sorting                       'alphabetic-desc
+			   treemacs-space-between-root-nodes      t
+			   treemacs-tag-follow-cleanup            t
+			   treemacs-tag-follow-delay              1.5
+			   treemacs-width                         30)
+		 (treemacs-resize-icons 20)
+
+		 (treemacs-follow-mode t)
+		 (treemacs-filewatch-mode t)
+		 (treemacs-fringe-indicator-mode t)
+		 (pcase (cons (not (null (executable-find "git")))
+					  (not (null (executable-find "python3"))))
+		   (`(t . t)
+			(treemacs-git-mode 'deferred))
+		   (`(t . _)
+			(treemacs-git-mode 'simple))))
+	   :bind
+	   (:map global-map
+			 ("M-0"       . treemacs-select-window)
+			 ("C-x t 1"   . treemacs-delete-other-windows)
+			 ("C-x t t"   . treemacs)
+			 ("C-x t B"   . treemacs-bookmark)
+			 ("C-x t C-t" . treemacs-find-file)
+			 ("C-x t M-t" . treemacs-find-tag)))
+
+	 (use-package treemacs-evil
+	   :after treemacs evil
+		 :ensure t)
+
+	   (use-package treemacs-icons-dired
+		 :after treemacs dired
+		 :ensure t
+		 :config (treemacs-icons-dired-mode))
+   #+END_SRC
+   I asume there is better way to do this but scince i dont know it ill do it this way
+   #+BEGIN_SRC elisp
+	 (add-hook 'after-init-hook
+			   '(lambda ()
+				  (treemacs-display-current-project-exclusively) 
+				 )
+			   )
+   #+END_SRC
+** window-number
+   #+BEGIN_SRC elisp
+		(use-package winum
+		  :config
+		  (require 'winum)
+		  (winum-mode)
+		  )
+   #+END_SRC
+** sublimity
+   #+BEGIN_SRC elisp
+	 (use-package sublimity
+	   :config
+	   (require 'sublimity-scroll)
+	   (sublimity-mode 1)
+	   )
+   #+END_SRC
+
+   #+RESULTS:
+   : t
+
+** centered-cursor-mode
+   #+BEGIN_SRC elisp
+	 (use-package centered-cursor-mode
+	   :init
+	   (centered-cursor-mode)
+	   )
+   #+END_SRC
+
+** lsp
+   #+BEGIN_SRC elisp
+	 (defun mye/lsp-mode-setup ()
+	   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+	   (lsp-headerline-breadcrumb-mode))
+
+	 (use-package lsp-mode
+	   :commands (lsp lsp-deferred)
+	   :hook (lsp-mode . mye/lsp-mode-setup)
+	   :init
+	   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+	   :config
+	   (lsp-enable-which-key-integration t))
+   #+END_SRC
+** lsp-ui
+   #+BEGIN_SRC elisp
+
+	 (use-package lsp-ui
+	   :hook (lsp-mode . lsp-ui-mode)
+	   :custom
+	   (lsp-ui-doc-position 'bottom))
+
+   #+END_SRC
+
+** lsp-treemacs
+   #+BEGIN_SRC elisp
+	 (use-package lsp-treemacs
+	   :after lsp)
+   #+END_SRC
+** lsp-ivy
+   #+BEGIN_SRC elisp
+	 (use-package lsp-ivy)
+   #+END_SRC
+** lsp-pyright
+   #+BEGIN_SRC elisp
+	 (use-package lsp-pyright)
+   #+END_SRC
+** company
+   #+BEGIN_SRC elisp
+	 (use-package company
+	   :after lsp-mode
+	   :hook (lsp-mode . company-mode)
+	   :bind (:map company-active-map
+			  ("<tab>" . company-complete-selection))
+			 (:map lsp-mode-map
+			  ("<tab>" . company-indent-or-complete-common))
+	   :custom
+	   (company-minimum-prefix-length 1)
+	   (company-idle-delay 0.0))
+
+	 (use-package company-box
+	   :hook (company-mode . company-box-mode))
+   #+END_SRC
+
+** yasnippets
+   #+BEGIN_SRC elisp
+	 (use-package yasnippet
+	   :ensure t
+	   :diminish yas-minor-mode
+	   :config
+	   (yas-reload-all))
+
+	 (use-package yasnippet-snippets
+	   :ensure t)
+   #+END_SRC
+
+   #+RESULTS:
+
+** web-mode
+   #+BEGIN_SRC elisp
+	 (use-package web-mode)
+   #+END_SRC
+** emmet-mode
+   #+BEGIN_SRC elisp
+	 (use-package emmet-mode)
+   #+END_SRC
+** company-web
+   #+BEGIN_SRC elisp
+	 (use-package company-web) 
+   #+END_SRC
+* Per language config
+** Python
+   #+BEGIN_SRC elisp
+	 ;; Python mode settings
+	 (add-hook 'python-mode-hook
+		 '(lambda ()
+			 (lsp)
+			 (yas-minor-mode)
+			 (ispell-minor-mode)
+			 (setq indent-tabs-mode t)
+			 (setq python-indent 4)
+			 (setq tab-width 4)
+			 )
+		 )
+   #+END_SRC
+** Vuejs
+   #+BEGIN_SRC elisp
+	 (add-to-list 'auto-mode-alist '("\\.vue$" . web-mode))
+
+	 (add-hook 'web-mode-hook  '(lambda ()
+								  (lsp)
+								  (yas-minor-mode)
+								  (emmet-mode)
+								  (setq-default indent-tabs-mode nil)))
+
+   #+END_SRC
+** cpp
+* Space prefixed keybinds
+  #+BEGIN_SRC elisp
+		(mye/leader-keys
+			 "p"  '(:ignore t :which-key "program")
+			 "pc" '(compile :which-key "compile")
+			 "pr" '(recompile :which-key "re-compile"))
+  #+END_SRC
+
+  #+RESULTS:
