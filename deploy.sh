@@ -12,5 +12,8 @@ ln -s $PWD/emacs/.emacs.d/config.org $HOME/.emacs.d/config.org
 ln -s $PWD/i3/.config/i3/config $HOME/.config/i3/config
 ln -s $PWD/i3/.config/i3/i3blocks.conf $HOME/.config/i3/i3blocks.conf
 
-##### Sripts #####
+##### NVIM #####
+ln -s $PWD/nvim/.config/nvim $HOME/.config/nvim
+
+##### SCRIPTS #####
 ln -s $PWD/scripts $HOME/scripts

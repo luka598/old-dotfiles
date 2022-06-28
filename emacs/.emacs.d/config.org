@@ -4,7 +4,7 @@
 
 * "Native" config
 ** Basic UI config
-  #+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC elisp
 	(setq inhibit-startup-message t)
 
 	(scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -63,7 +63,7 @@
    #+END_SRC
 ** Config packages
 *** Configure package manager
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC elisp
      ;; Initialize package sources
      (require 'package)
 
@@ -84,7 +84,7 @@
    #+END_SRC
 
 ** Basic keybinds
-  #+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC elisp
     ; Make ESC quit prompts
     (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
   #+END_SRC
@@ -386,9 +386,24 @@
 	 (use-package lsp-ui
 	   :hook (lsp-mode . lsp-ui-mode)
 	   :custom
-	   (lsp-ui-doc-position 'bottom))
+	   (lsp-ui-doc-position 'bottom)
+	   (setq lsp-ui-sideline-enable t
+			 lsp-ui-sideline-show-diagnostics nil
+			 lsp-ui-sideline-show-symbol nil
+			 lsp-ui-sideline-show-hover t
+			 lsp-ui-sideline-show-flycheck t
+			 lsp-ui-sideline-show-code-actions nil
+			 lsp-ui-sideline-show-diagnostics nil)
+
+	   ;; (setq lsp-ui-doc-enable nil)
+	   ;; (setq lsp-ui-imenu-enable nil)
+	   ;; (setqlsp-ui-peek-enable nil)
+	   )
 
    #+END_SRC
+
+   #+RESULTS:
+   | company-mode | lsp-ui-mode | mye/lsp-mode-setup |
 
 ** lsp-treemacs
    #+BEGIN_SRC elisp
@@ -464,6 +479,17 @@
 ** Vuejs
    #+BEGIN_SRC elisp
 	 (add-to-list 'auto-mode-alist '("\\.vue$" . web-mode))
+
+	 (add-hook 'web-mode-hook  '(lambda ()
+								  (lsp)
+								  (yas-minor-mode)
+								  (emmet-mode)
+								  (setq-default indent-tabs-mode nil)))
+
+   #+END_SRC
+** TypeScript
+   #+BEGIN_SRC elisp
+	 (add-to-list 'auto-mode-alist '("\\.ts$" . web-mode))
 
 	 (add-hook 'web-mode-hook  '(lambda ()
 								  (lsp)
